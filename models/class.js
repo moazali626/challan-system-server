@@ -5,6 +5,10 @@ const classSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  fees: {
+    type: Number,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("class", classSchema);

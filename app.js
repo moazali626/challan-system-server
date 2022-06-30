@@ -6,6 +6,7 @@ const cors = require("cors");
 const User = require("./models/user");
 const Student = require("./models/student");
 const Class = require("./models/class");
+const Challan = require("./models/challan");
 const isAuth = require("./middleware/auth");
 const dbConnection = require("./connection/connection");
 dbConnection();
@@ -160,7 +161,7 @@ app.post("/generate-challan", async (req, res) => {
     const result = await Class.findOne({ className }).lean();
     const { fees } = result;
 
-    const students = await Student.find({ className, mode: [2, 4] }).lean();
+    const students = await Student.find({ className, mode: [2, 4, 1] }).lean();
 
     //Generating Issue Date
     const dateObj = new Date();
@@ -172,21 +173,39 @@ app.post("/generate-challan", async (req, res) => {
     // console.log("Issue Date:", issueDate);
     // console.log("Due Date", dueDate);
 
+    let finalFees, finalIssueData, finalDueDate;
+
     students.forEach((element) => {
-      //Generating Due Date
       let d = new Date();
       d.setDate(d.getDate() + 21 * element.mode);
       const dueDate = JSON.stringify(d).split("T")[0].slice(1);
 
-      element.fees = element.mode * fees;
-      element.issueDate = issueDate;
-      element.dueDate = dueDate;
+      finalFees = element.mode * fees;
+      finalIssueData = issueDate;
+      finalDueDate = dueDate;
+
+      const saveChallan = async () => {
+        const newChallan = await Challan.create({
+          fees: finalFees,
+          issueDate: finalIssueData,
+          dueDate: finalDueDate,
+          challan: element._id,
+        });
+      };
+      saveChallan();
     });
 
     res.send(students);
   } catch (e) {
+    console.log(e);
     res.send(e);
   }
+});
+
+app.get("/display-challan", async (req, res) => {
+  const result = await Challan.find({}).populate("challan");
+  console.log(result);
+  res.send(result);
 });
 
 app.listen(PORT, () => {
