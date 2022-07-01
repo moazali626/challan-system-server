@@ -13,6 +13,10 @@ const challanSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  mode: {
+    type: Number,
+    required: true,
+  },
   challan: {
     type: "ObjectId",
     ref: "student",

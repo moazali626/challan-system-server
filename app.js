@@ -163,15 +163,22 @@ app.post("/generate-challan", async (req, res) => {
 
     const students = await Student.find({ className, mode: [2, 4, 1] }).lean();
 
+    //MODE 1 CODE
+
+    // const modeOneStudents = students.filter((item) => {
+    //   return item.mode === 1;
+    // });
+
+    // const newArray = students.filter((item) => {
+    //   return item.mode !== 1;
+    // });
+
     //Generating Issue Date
     const dateObj = new Date();
     let date = ("0" + dateObj.getDate()).slice(-2);
     let month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
     let year = dateObj.getFullYear();
     const issueDate = year + "-" + month + "-" + date;
-
-    // console.log("Issue Date:", issueDate);
-    // console.log("Due Date", dueDate);
 
     let finalFees, finalIssueData, finalDueDate;
 
@@ -190,12 +197,29 @@ app.post("/generate-challan", async (req, res) => {
           issueDate: finalIssueData,
           dueDate: finalDueDate,
           challan: element._id,
+          mode: element.mode,
         });
+        // console.log("doc", newChallan);
+        if (newChallan.mode === 1) {
+          const str = finalDueDate;
+          const date = new Date(str);
+          date.setDate(date.getDate() + 21 * 1);
+          const strDate = JSON.stringify(date).split("T")[0].slice(1);
+          // console.log(strDate);
+          // console.log(date);
+          const newChallan = await Challan.create({
+            fees: finalFees,
+            issueDate: finalDueDate,
+            dueDate: strDate,
+            challan: element._id,
+            mode: element.mode,
+          });
+        }
       };
       saveChallan();
     });
 
-    res.send(students);
+    res.send("challans generated");
   } catch (e) {
     console.log(e);
     res.send(e);
@@ -203,8 +227,12 @@ app.post("/generate-challan", async (req, res) => {
 });
 
 app.get("/display-challan", async (req, res) => {
+  // const result = await Challan.find({}).populate({
+  //   path: "challan",
+  //   options: { sort: "firstName" },
+  // });
+  // const result = await Challan.find({}).populate("challan").sort({ mode: 1 });
   const result = await Challan.find({}).populate("challan");
-  console.log(result);
   res.send(result);
 });
 
