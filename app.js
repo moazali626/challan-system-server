@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const dateFns = require("date-fns");
 const cors = require("cors");
 const User = require("./models/user");
 const Student = require("./models/student");
@@ -203,14 +204,33 @@ app.post("/generate-challan", async (req, res) => {
         if (newChallan.mode === 1) {
           const str = finalDueDate;
           const date = new Date(str);
-          date.setDate(date.getDate() + 21 * 1);
-          const strDate = JSON.stringify(date).split("T")[0].slice(1);
-          // console.log(strDate);
-          // console.log(date);
+
+          //add one month
+          const addedMonthDate = dateFns.addMonths(date, 1);
+
+          //set date to 1st
+          const changedIssueDate = dateFns.setDate(addedMonthDate, 1);
+
+          const changedIssueDateCopy = new Date(changedIssueDate);
+
+          //add 3 weeks in issue date to make due date
+          let changedDueDate = changedIssueDateCopy.setDate(
+            changedIssueDateCopy.getDate() + 21
+          );
+          const changedDueDateLatest = new Date(changedDueDate);
+
+          const changedIssueDateStr = JSON.stringify(changedIssueDate)
+            .split("T")[0]
+            .slice(1);
+
+          const changedDueDateStr = JSON.stringify(changedDueDateLatest)
+            .split("T")[0]
+            .slice(1);
+
           const newChallan = await Challan.create({
             fees: finalFees,
-            issueDate: finalDueDate,
-            dueDate: strDate,
+            issueDate: changedIssueDateStr,
+            dueDate: changedDueDateStr,
             challan: element._id,
             mode: element.mode,
           });
