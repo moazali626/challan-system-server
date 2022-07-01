@@ -256,6 +256,22 @@ app.get("/display-challan", async (req, res) => {
   res.send(result);
 });
 
+app.post("/update-status", async (req, res) => {
+  const { challanId, status } = req.body;
+
+  console.log(req.body);
+
+  const challan = await Challan.findOneAndUpdate(
+    { _id: challanId },
+    { status },
+    { new: true }
+  );
+
+  console.log(challan);
+
+  res.send(challan);
+});
+
 app.listen(PORT, () => {
   `Server is up & running at port ${PORT}`;
 });

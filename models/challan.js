@@ -18,8 +18,14 @@ const challanSchema = mongoose.Schema({
     required: true,
   },
   challan: {
+    required: true,
     type: "ObjectId",
     ref: "student",
+  },
+  status: {
+    type: String,
+    required: true,
+    default: "Pending",
   },
 });
 
