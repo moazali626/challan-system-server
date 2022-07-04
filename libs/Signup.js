@@ -34,7 +34,7 @@ const SignUp = async (req, res) => {
 
     await user.save();
 
-    return httpStatusCode.OK;
+    return { code: httpStatusCode.OK, token: token };
   } catch (e) {
     // res.send(e);
   }

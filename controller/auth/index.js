@@ -22,14 +22,15 @@ exports.signUp = (req) => {
       // your sign up function from libs or helper functions
       const signUpFun = async () => {
         const result = await SignUp(req);
-
+        console.log(result);
         if (result === 409) {
           return reject({
             code: httpStatusCode.CONFLICT,
             message: message.USER_ALREADY_EXISTS,
           });
-        } else if (result === 200) {
+        } else if (result.code === 200) {
           return resolve({
+            token: result.token,
             code: httpStatusCode.OK,
             message: message.USER_REGISTERED,
           });
@@ -64,7 +65,7 @@ exports.login = (req) => {
       // your sign up function from libs or helper functions
       const loginFun = async () => {
         const result = await login(req);
-
+        console.log(result);
         if (result === 404) {
           return reject({
             code: httpStatusCode.NOT_FOUND,
@@ -74,6 +75,11 @@ exports.login = (req) => {
           return resolve({
             code: httpStatusCode.UNAUTHORIZED,
             message: exception.INVALID_PASSWORD,
+          });
+        } else if (result === 200) {
+          return resolve({
+            code: httpStatusCode.OK,
+            message: message.USER_LOGGEDIN,
           });
         }
       };

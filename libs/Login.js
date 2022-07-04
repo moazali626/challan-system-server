@@ -1,9 +1,11 @@
 const { httpStatusCode } = require("../constants");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const login = async (req, res) => {
   try {
+    console.log("login route ran");
     const { email, password } = req.body;
 
     //check if user exists
@@ -31,8 +33,7 @@ const login = async (req, res) => {
 
     await user.save();
 
-    //send user details
-    // res.send(user);
+    return httpStatusCode.OK;
   } catch (e) {
     // res.send(e);
   }
