@@ -1,6 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const dateFns = require("date-fns");
 const cors = require("cors");
@@ -9,57 +11,91 @@ const Student = require("./models/student");
 const Class = require("./models/class");
 const Challan = require("./models/challan");
 const isAuth = require("./middleware/auth");
-const dbConnection = require("./connection/connection");
-dbConnection();
+const db = require("./config/database");
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-const PORT = process.env.PORT || 4000;
+const Port =
+  process.env.NODE_ENV && process.env.NODE_ENV === "test"
+    ? process.env.TEST_PORT || 4000
+    : process.env.PORT || 3001;
 
-app.get("/", (req, res) => {
-  res.send("Homepage");
-});
+//Configure mongoose
 
-app.post("/signup", async (req, res) => {
+mongoose
+  .connect(db.url, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("Database Connection Established");
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit;
+  });
+
+// HealthCheck
+
+app.get("/healthcheck", async (_req, res, _next) => {
+  // optional: add further things to check (e.g. connecting to dababase)
+  const healthcheck = {
+    uptime: process.uptime(),
+    message: "OK",
+    timestamp: Date.now(),
+  };
   try {
-    const { name, email, password } = req.body;
-
-    //validation for all fields
-    if (!name || !email || !password) {
-      return res.status(400).send("Please provide all fields");
-    }
-
-    //check if user already exists
-    const isRegistered = await User.findOne({ email });
-
-    if (isRegistered) {
-      return res.status(409).send("User is already registered");
-    }
-
-    //hashing the password
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    //creating a new user
-    const user = await User.create({
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-    });
-
-    //creating token
-    const token = jwt.sign({ _id: user._id.toString() }, "Pm1qWmxsbP", {
-      expiresIn: "1h",
-    });
-
-    user.token = token;
-
-    await user.save();
-
-    res.status(200).send({ user });
-  } catch (e) {}
+    res.send(healthcheck);
+  } catch (e) {
+    healthcheck.message = e;
+    res.status(503).send();
+  }
 });
+
+app.use("/api", require("./router"));
+app.use("/api/server", (req, res) => {
+  res.send("Server running");
+});
+
+// app.post("/signup", async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
+
+//     //validation for all fields
+//     if (!name || !email || !password) {
+//       return res.status(400).send("Please provide all fields");
+//     }
+
+//     //check if user already exists
+//     const isRegistered = await User.findOne({ email });
+
+//     if (isRegistered) {
+//       return res.status(409).send("User is already registered");
+//     }
+
+//     //hashing the password
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     //creating a new user
+//     const user = await User.create({
+//       name,
+//       email: email.toLowerCase(),
+//       password: hashedPassword,
+//     });
+
+//     //creating token
+//     const token = jwt.sign({ _id: user._id.toString() }, "Pm1qWmxsbP", {
+//       expiresIn: "1h",
+//     });
+
+//     user.token = token;
+
+//     await user.save();
+
+//     res.status(200).send({ user });
+//   } catch (e) {
+//     res.send(e);
+//   }
+// });
 
 app.post("/login", async (req, res) => {
   try {
@@ -164,16 +200,6 @@ app.post("/generate-challan", async (req, res) => {
 
     const students = await Student.find({ className, mode: [2, 4, 1] }).lean();
 
-    //MODE 1 CODE
-
-    // const modeOneStudents = students.filter((item) => {
-    //   return item.mode === 1;
-    // });
-
-    // const newArray = students.filter((item) => {
-    //   return item.mode !== 1;
-    // });
-
     //Generating Issue Date
     const dateObj = new Date();
     let date = ("0" + dateObj.getDate()).slice(-2);
@@ -200,7 +226,6 @@ app.post("/generate-challan", async (req, res) => {
           challan: element._id,
           mode: element.mode,
         });
-        // console.log("doc", newChallan);
         if (newChallan.mode === 1) {
           const str = finalDueDate;
           const date = new Date(str);
@@ -259,19 +284,17 @@ app.get("/display-challan", async (req, res) => {
 app.post("/update-status", async (req, res) => {
   const { challanId, status } = req.body;
 
-  console.log(req.body);
-
   const challan = await Challan.findOneAndUpdate(
     { _id: challanId },
     { status },
     { new: true }
   );
 
-  console.log(challan);
-
   res.send(challan);
 });
 
-app.listen(PORT, () => {
-  `Server is up & running at port ${PORT}`;
+//Server port listening
+
+app.listen(Port, () => {
+  console.log(`Server is up & running at port ${Port}`);
 });
