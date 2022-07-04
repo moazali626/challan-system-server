@@ -13,6 +13,12 @@ exports.httpStatusCode = {
 };
 
 exports.message = {
+  CHALLAN_STATUS_UPDATED: "Challan status has been updated",
+  CHALLANS_GENERATED: "Challans has been generated",
+  CLASS_CREATED: "Class has been created successfully",
+  CLASS_ALREADY_EXISTS: "Class already exists",
+  STUDENT_NOT_ADDED: "Unable to add student",
+  STUDENT_ADDED: "Student has been added successfully!",
   INTERNAL_SERVER_ERROR: "Internal server error!",
   FAILED_TO_SAVE_USER: "Failed to save user!",
   USER_REGISTERED: "User registered successfully!",
