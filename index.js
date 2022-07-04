@@ -55,34 +55,30 @@ app.use("/api/server", (req, res) => {
   res.send("Server running");
 });
 
-// app.post("/signup", async (req, res) => {
+// app.post("/login", async (req, res) => {
 //   try {
-//     const { name, email, password } = req.body;
-
+//     const { email, password } = req.body;
 //     //validation for all fields
-//     if (!name || !email || !password) {
-//       return res.status(400).send("Please provide all fields");
+//     if (!email || !password) {
+//       return res.status(409).send("Please provide all fields");
 //     }
 
-//     //check if user already exists
-//     const isRegistered = await User.findOne({ email });
+//     //check if user exists
+//     const user = await User.findOne({ email });
 
-//     if (isRegistered) {
-//       return res.status(409).send("User is already registered");
+//     if (!user) {
+//       return res.send({ error: "no_user_found" });
 //     }
 
-//     //hashing the password
+//     //match password
+//     const isValid = await bcrypt.compare(password, user.password);
 
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     //creating a new user
-//     const user = await User.create({
-//       name,
-//       email: email.toLowerCase(),
-//       password: hashedPassword,
-//     });
+//     if (!isValid) {
+//       return res.send({ error: "invalid_details" });
+//     }
 
 //     //creating token
+
 //     const token = jwt.sign({ _id: user._id.toString() }, "Pm1qWmxsbP", {
 //       expiresIn: "1h",
 //     });
@@ -91,50 +87,12 @@ app.use("/api/server", (req, res) => {
 
 //     await user.save();
 
-//     res.status(200).send({ user });
+//     //send user details
+//     res.send(user);
 //   } catch (e) {
 //     res.send(e);
 //   }
 // });
-
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    //validation for all fields
-    if (!email || !password) {
-      return res.status(409).send("Please provide all fields");
-    }
-
-    //check if user exists
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.send({ error: "no_user_found" });
-    }
-
-    //match password
-    const isValid = await bcrypt.compare(password, user.password);
-
-    if (!isValid) {
-      return res.send({ error: "invalid_details" });
-    }
-
-    //creating token
-
-    const token = jwt.sign({ _id: user._id.toString() }, "Pm1qWmxsbP", {
-      expiresIn: "1h",
-    });
-
-    user.token = token;
-
-    await user.save();
-
-    //send user details
-    res.send(user);
-  } catch (e) {
-    res.send(e);
-  }
-});
 
 app.post("/add-student", async (req, res) => {
   try {

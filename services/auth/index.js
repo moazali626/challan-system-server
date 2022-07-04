@@ -8,7 +8,7 @@ const serviceRouter = express.Router();
 
 serviceRouter.post("/signup", signUpValidator, routes.signUpRoute);
 
-// serviceRouter.post("/signup", signUpValidator, routes.signUpRoute);
+serviceRouter.post("/login", loginValidator, routes.loginRoute);
 
 // serviceRouter.post("/login", loginValidator, routes.loginRoute);
 
