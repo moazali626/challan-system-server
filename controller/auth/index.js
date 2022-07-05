@@ -5,6 +5,7 @@ const { httpStatusCode, message, exception } = require("../../constants");
 const User = require("../../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { findOneUser } = require("../../libs/user");
 
 /**
  * POST /auth/signup
@@ -26,7 +27,7 @@ exports.signUp = (req) => {
       const { name, email, password } = req.body;
 
       //check if user already exists
-      const isRegistered = await User.findOne({ email });
+      const isRegistered = await findOneUser({ email });
 
       if (isRegistered) {
         return reject({
@@ -55,11 +56,13 @@ exports.signUp = (req) => {
       await user.save();
 
       return resolve({
+        user: user,
         code: httpStatusCode.OK,
         message: message.USER_REGISTERED,
       });
     } catch (error) {
-      Logger.error(error);
+      console.log(error);
+      // Logger.error(error);
       return reject({
         code: httpStatusCode.INTERNAL_SERVER_ERROR,
         message: message.INTERNAL_SERVER_ERROR,
@@ -89,7 +92,7 @@ exports.login = (req) => {
       const { email, password } = req.body;
 
       //check if user exists
-      const user = await User.findOne({ email });
+      const user = await findOneUser({ email });
 
       if (!user) {
         return reject({
@@ -123,7 +126,7 @@ exports.login = (req) => {
         message: message.USER_LOGGEDIN,
       });
     } catch (error) {
-      Logger.error(error);
+      // Logger.error(error);
       return reject({
         code: httpStatusCode.INTERNAL_SERVER_ERROR,
         message: message.INTERNAL_SERVER_ERROR,

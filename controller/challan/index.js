@@ -6,6 +6,7 @@ const Class = require("../../models/class");
 const Student = require("../../models/student");
 const Challan = require("../../models/challan");
 const dateFns = require("date-fns");
+const { findOneClass } = require("../../libs/class");
 
 /**
  * POST /auth/signup
@@ -26,7 +27,8 @@ exports.generateChallan = (req) => {
 
       const { className } = req.body;
 
-      const result = await Class.findOne({ className }).lean();
+      const result = await findOneClass({ className });
+
       const { fees } = result;
 
       const students = await Student.find({

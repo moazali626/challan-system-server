@@ -22,7 +22,6 @@ exports.addStudent = (req) => {
       //If above validation succeeds, add student code will run
 
       const { firstName, lastName, className, mode } = req.body;
-      console.log(req.body);
 
       const result = await Student.create({
         firstName,
