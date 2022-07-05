@@ -46,6 +46,10 @@ app.use("/api/server", (req, res) => {
   res.send("Server running");
 });
 
+app.post("/dashboard", isAuth, (req, res) => {
+  res.send("Welcome!");
+});
+
 //Server port listening
 
 app.listen(Port, () => {
