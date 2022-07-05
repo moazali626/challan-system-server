@@ -13,7 +13,6 @@ exports.addClass = (req) => {
           message: validationErrors.array(),
         });
       }
-
       //If above validation succeeds, add class account code will run
 
       const { addClass, classFees } = req.body;
